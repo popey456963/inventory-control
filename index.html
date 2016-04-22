@@ -1,0 +1,21 @@
+<table style="width:100%">
+</table>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+  var socket = io();
+  socket.emit('get data', "", function(data){
+  	console.log(data)
+    var tr;
+    for (var i = 0; i < data.length; i++) {
+      tr = $('<tr/>');
+      tr.append("<td>" + data[i]._id + "</td>");
+      tr.append("<td>" + data[i].name + "</td>");
+      tr.append("<td>" + data[i].amount + "</td>");
+      tr.append("<td>" + "<button type='button'>Add 1</button>" + "</td>");
+      tr.append("<td>" + "<button type='button'>Remove 1</button>" + "</td>");
+      $('table').append(tr);
+    }
+  });
+</script>
