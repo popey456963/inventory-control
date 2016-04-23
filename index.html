@@ -1,21 +1,77 @@
-<table style="width:100%">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css">
+
+<table id="mytable" style="width:100%">
+ <thead>
+    <tr>
+      <th>Name</th>
+      <th>Amount</th>
+      <th>Add Item</th>
+      <th>Remove Item</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
 </table>
+
+<form id="form">
+  <br ><br >
+  Add Item: <input type="text" id="newItem" name="item">
+  <input type="submit" value="Submit">
+</form>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 <script>
+  $('#form').submit(function () {
+    console.log("Adding: " + $('#newItem').val())
+  	socket.emit('add item', $('#newItem').val())
+    $('#newItem').val("")
+    return false;
+  });
+
+  function add_item(i, num) {
+  	name = $("#name_" + i).html()
+  	amount = $("#amount_" + i).html()
+  	newValue = parseInt(amount) + num
+  	console.log("Adding " + num +  " item(s) to " + name + " to make " + newValue + " total items.")
+  	socket.emit('set item', [name, newValue])
+  	$("#amount_" + i).html(newValue)
+  }
+
+  function remove_item(i, num) {
+  	name = $("#name_" + i).html()
+  	amount = $("#amount_" + i).html()
+  	newValue = parseInt(amount) - num
+  	console.log("Removing " + num +  " item(s) from " + name + " to make " + newValue + " total items.")
+  	socket.emit('set item', [name, newValue])
+  	$("#amount_" + i).html(newValue)
+  }
+
   var socket = io();
+
+  socket.on('set item', function(data) {
+  	var table = document.getElementById("mytable")
+	for (var i = 0, row; row = table.rows[i]; i++) {
+	  name = row.getElementsByClassName("name")[0].innerHTML
+	  if (name == data[0]) {
+	  	$("#amount_" + i).html(data[1])
+	  }
+	}
+	console.log("Set item " + data[0] + " to be " + data[1])
+  })
+
   socket.emit('get data', "", function(data){
   	console.log(data)
     var tr;
     for (var i = 0; i < data.length; i++) {
       tr = $('<tr/>');
-      tr.append("<td>" + data[i]._id + "</td>");
-      tr.append("<td>" + data[i].name + "</td>");
-      tr.append("<td>" + data[i].amount + "</td>");
-      tr.append("<td>" + "<button type='button'>Add 1</button>" + "</td>");
-      tr.append("<td>" + "<button type='button'>Remove 1</button>" + "</td>");
-      $('table').append(tr);
+      tr.append("<td class='name' id='name_" + i + "'>" + data[i].name + "</td>");
+      tr.append("<td id='amount_" + i + "'>" + data[i].amount + "</td>");
+      tr.append("<td id='add_" + i + "'>" + "<button onclick='add_item(" + i + ", 1)' type='button'>Add 1</button>" + "</td>");
+      tr.append("<td id='remove_" + i + "'>" + "<button type='button' onclick='remove_item(" + i + ", 1)'>Remove 1</button>" + "</td>");
+      $('table tbody').append(tr);
     }
+    $('#mytable').DataTable();
   });
 </script>

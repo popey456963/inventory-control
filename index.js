@@ -77,17 +77,24 @@ MongoClient.connect(url, function (err, db) {
 });
 
 io.on('connection', function(socket){
-  logger.log('a user connected');
+  logger.log('a user connected')
   socket.on('disconnect', function(){
-    logger.log('user disconnected');
-  });
+    logger.log('user disconnected')
+  })
   socket.on('get data', function(msg, callback){
-    logger.log('message: ' + msg);
+    logger.log('message: ' + msg)
     getItems(function(result) {
       callback(result)
     })
-  });
-});
+  })
+  socket.on('set item', function(msg) {
+    setAmount(msg[0], msg[1], function(result) {})
+    socket.broadcast.emit('set item', [msg[0], msg[1]])
+  })
+  socket.on('add item', function(msg) {
+    addItem(msg, 0, function() {})
+  })
+})
 
 app.use(express.static(path.join(__dirname, 'static')));
 
