@@ -59,6 +59,7 @@ function getItems(callback) {
 MongoClient.connect(url, function (err, db) {
   if (err) {
     logger.error('Unable to connect to the mongoDB server. Error: ' + err)
+    process.exit(1)
   } else {
     logger.success('Connection established to ' + url)
     collection = db.collection('items')
@@ -93,6 +94,7 @@ io.on('connection', function(socket){
   })
   socket.on('add item', function(msg) {
     addItem(msg, 0, function() {})
+    socket.emit('add item', [msg, 0])
   })
 })
 

@@ -23,6 +23,8 @@
 <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 <script>
+  var table;
+  var j = 0;
   $('#form').submit(function () {
     console.log("Adding: " + $('#newItem').val())
   	socket.emit('add item', $('#newItem').val())
@@ -48,17 +50,28 @@
   	$("#amount_" + i).html(newValue)
   }
 
+  function addRow(data) {
+    $('table#mytable').dataTable().fnAddData( [
+      "<td class='name' id='name_" + j + "'>" + data[0] + "</td>",
+      "<td id='amount_" + j + "'>" + data[1] + "</td>",
+      "<td id='add_" + j + "'>" + "<button onclick='add_item(" + j + ", 1)' type='button'>Add 1</button>" + "</td>",
+      "<td id='remove_" + j + "'>" + "<button type='button' onclick='remove_item(" + j + ", 1)'>Remove 1</button>" + "</td>" ] );
+    j++;
+  }
+
   var socket = io();
 
   socket.on('set item', function(data) {
-  	var table = document.getElementById("mytable")
-	for (var i = 0, row; row = table.rows[i]; i++) {
-	  name = row.getElementsByClassName("name")[0].innerHTML
-	  if (name == data[0]) {
-	  	$("#amount_" + i).html(data[1])
-	  }
-	}
-	console.log("Set item " + data[0] + " to be " + data[1])
+    table.column(0).data().each(function (value, index) {
+      if (value == data[0]) {
+        console.log( 'Data in index: ' + index + ' is: ' + value );
+      }
+    });
+  })
+
+  socket.on('add item', function(data) {
+    console.log(data);
+    addRow(data);
   })
 
   socket.emit('get data', "", function(data){
@@ -71,7 +84,9 @@
       tr.append("<td id='add_" + i + "'>" + "<button onclick='add_item(" + i + ", 1)' type='button'>Add 1</button>" + "</td>");
       tr.append("<td id='remove_" + i + "'>" + "<button type='button' onclick='remove_item(" + i + ", 1)'>Remove 1</button>" + "</td>");
       $('table tbody').append(tr);
+      j = i;
     }
-    $('#mytable').DataTable();
+    j++;
+    table = $('#mytable').DataTable();
   });
 </script>
