@@ -56,15 +56,19 @@
       "<td id='amount_" + j + "'>" + data[1] + "</td>",
       "<td id='add_" + j + "'>" + "<button onclick='add_item(" + j + ", 1)' type='button'>Add 1</button>" + "</td>",
       "<td id='remove_" + j + "'>" + "<button type='button' onclick='remove_item(" + j + ", 1)'>Remove 1</button>" + "</td>" ] );
-    j++;
-  }
+    j++
+;  }
 
   var socket = io();
 
   socket.on('set item', function(data) {
-    table.column(0).data().each(function (value, index) {
-      if (value == data[0]) {
-        console.log( 'Data in index: ' + index + ' is: ' + value );
+    table.data().each(function (value, index) {
+      if (value[0] == data[0]) {
+        console.log('Data in index: ' + index + ' is: ' + value);
+        this[index][0] = 9999
+        table.draw(false)
+        console.log(this[index][0])
+        console.log(table.cell(index, 0, false).data() + " " + table.cell(index, 1, false).data())
       }
     });
   })
